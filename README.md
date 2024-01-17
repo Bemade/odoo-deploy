@@ -7,18 +7,18 @@ compatible git repository, typically at `<repo-root>/tools`.
 To include it in your Odoo.sh-compatible repository, run the following from
 your repository root:
 
-        git submodule add git@github.com:bemade/odoo-deploy tools
+    git submodule add git@github.com:bemade/odoo-deploy tools
 
 If you have cloned a repository with this submodule included, you will most
 likely need to run:
 
-        git submodule update --init --recursive
+    git submodule update --init --recursive
 
 ## Basic Usage
 
 From the repository root, run the deployment script:
 
-        tools/deploy
+    tools/deploy
 
 The script will make sure that the standard Odoo repositories are checked out:
 
@@ -38,6 +38,6 @@ instance. You may need to edit odoo.conf, especially if your Postgresql
 database requires different user credentials. To run Odoo from the terminal:
 
 
-        odoo/odoo-bin -c conf/odoo.conf
+    odoo/odoo-bin -c conf/odoo.conf
 
 **Happy Odooing!**
