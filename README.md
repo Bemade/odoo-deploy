@@ -8,6 +8,10 @@ To include it in your Odoo.sh-compatible repository, run the following from
 your repository root:
 
         git submodule add git@github.com:bemade/odoo-deploy tools
+
+If you have cloned a repository with this submodule included, you will most
+likely need to run:
+
         git submodule update --init --recursive
 
 ## Basic Usage
