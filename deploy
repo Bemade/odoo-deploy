@@ -1,0 +1,105 @@
+#!/bin/bash
+# Script to automate local sandbox creation for developer
+BRANCH='15.0'
+BASEDIR=`pwd`
+REPOSDIR=$BASEDIR"/.repos"
+REPOS=$REPOSDIR"/*"
+
+update_python_path() {
+    # Add the odoo directory to the PYTHONPATH for lines with "from odoo import ..." to work properly
+    if [[ $OSTYPE == 'darwin' ]]; then
+      if ! grep -q PYTHONPATH "venv/bin/activate"; then
+        sed -i '' '/# reset old environment variables/  a\
+        export PYTHONPATH="$OLD_PYTHON_PATH"\
+        unset OLD_PYTHONPATH\
+' venv/bin/activate
+        sed -i '' '/export VIRTUAL_ENV/  a\
+    \
+    export OLD_PYTHONPATH="$PYTHONPATH"\
+    export PYTHONPATH="$VIRTUAL_ENV/../odoo:$PYTHONPATH"\
+' venv/bin/activate
+      fi
+    else
+      if ! grep -q PYTHONPATH "venv/bin/activate"; then
+        sed -i '/# reset old environment variables/  a\
+        export PYTHONPATH="$OLD_PYTHON_PATH"\
+        unset OLD_PYTHONPATH\
+' venv/bin/activate
+        sed -i '/export VIRTUAL_ENV/  a\
+    \
+    export OLD_PYTHONPATH="$PYTHONPATH"\
+    export PYTHONPATH="$VIRTUAL_ENV/../odoo:$PYTHONPATH"\
+' venv/bin/activate
+      fi
+    fi
+}
+
+eval `ssh-agent`
+ssh-add
+
+[ ! -d "$BASEDIR/odoo" ] && git clone -b $BRANCH git@github.com:odoo/odoo.git || echo "Odoo exist, skipping."
+[ ! -d "$BASEDIR/enterprise" ] && git clone -b $BRANCH git@github.com:odoo/enterprise.git || echo "Enterprise exist, skipping."
+[ ! -d "$BASEDIR/design-themes" ] && git clone -b $BRANCH git@github.com:odoo/design-themes.git || echo "Themes exist, skipping."
+
+[ "$(ls -A $REPOSDIR/crm)" ] && echo "Git submodule already initialised, skipping" || git submodule update --init --recursive
+
+mkdir -p conf
+
+cp odoo/debian/odoo.conf conf/odoo.conf
+cp odoo/requirements.txt  conf/requirements.txt
+
+SPACER="    "
+
+ADDONSPATH="addons_path =\n"
+ADDONSPATH+=$SPACER$BASEDIR"/odoo/addons,\n"
+ADDONSPATH+=$SPACER$BASEDIR"/odoo/odoo/addons,\n"
+ADDONSPATH+=$SPACER$BASEDIR"/design-themes,\n"
+ADDONSPATH+=$SPACER$BASEDIR"/enterprise,\n"
+
+for REPO in $REPOS
+do
+  echo "Processing $REPO repo..."
+# Removed forcing all modules to be ln in addons.
+#  ADDONSPATH+=$SPACER$REPO",\n"
+
+  if test -f "$REPO/requirements.txt"; then
+    echo "$REPO/requirements.txt exists."
+    echo "# $REPO Requirements" >> conf/requirements.txt
+    cat "$REPO/requirements.txt" >> conf/requirements.txt
+  fi
+
+done
+
+cat requirements.txt >> conf/requirements.txt
+
+ADDONSPATH+=$SPACER$BASEDIR"/addons"
+
+echo -e $ADDONSPATH >> conf/odoo.conf
+
+echo "You now have a conf/requirements.txt to install and a conf/Odoo.conf to fixed to your configuration needs!!!"
+
+if which python3.8 >/dev/null; then
+  echo "you got python 3.8, will continue creating venv and installing requirments according to OS"
+  python3.8 -m venv venv
+  update_python_path
+  source venv/bin/activate || { echo "failed to activate virtual environment" ; exit 1; }
+  pip3 install --upgrade pip
+  if [[ $OSTYPE == 'win32'* ]]; then
+    echo "Windows, please run this script in a Ubuntu VM"
+  fi
+  if [[ $OSTYPE == 'darwin'* ]]; then
+    echo "MacOS need to replace psychopg2 and get most recent cryptograpy"
+    sed -i -e "s/psycopg2==2.8.6; sys_platform == 'win32' or python_version >= '3.8'/psycopg2==2.8.6; sys_platform == 'win32' or python_version >= '3.8' and sys_platform != 'darwin'\npsycopg2-binary; sys_platform == 'darwin'/g" conf/requirements.txt
+    sed -i -e 's/^cryptography==2.6.1/#&/' conf/requirements.txt
+    sed -i -e 's/^cryptography$/&==36.0.2/' conf/requirements.txt
+    echo "limit_memory_hard = 0" >> conf/odoo.conf
+  fi
+  if [[ $OSTYPE == 'linux-gnu'* ]]; then
+    sed -i -e "s/psycopg2==.*/psycopg2-binary/g" conf/requirements.txt
+    echo 'Linux'
+  fi
+
+  pip3 install -r conf/requirements.txt
+else
+  echo Can not find Python 3.8 in path
+fi
