@@ -7,7 +7,7 @@ REPOS=$REPOSDIR"/*"
 
 update_python_path() {
     # Add the odoo directory to the PYTHONPATH for lines with "from odoo import ..." to work properly
-    if [[ $OSTYPE == 'darwin' ]]; then
+    if [[ $OSTYPE == 'darwin'* ]]; then
       if ! grep -q PYTHONPATH "venv/bin/activate"; then
         sed -i '' '/# reset old environment variables/  a\
         export PYTHONPATH="$OLD_PYTHON_PATH"\
@@ -90,8 +90,7 @@ if which python3.8 >/dev/null; then
   if [[ $OSTYPE == 'darwin'* ]]; then
     echo "MacOS need to replace psychopg2 and get most recent cryptograpy"
     sed -i -e "s/psycopg2==2.8.6; sys_platform == 'win32' or python_version >= '3.8'/psycopg2==2.8.6; sys_platform == 'win32' or python_version >= '3.8' and sys_platform != 'darwin'\npsycopg2-binary; sys_platform == 'darwin'/g" conf/requirements.txt
-    sed -i -e 's/^cryptography==2.6.1/#&/' conf/requirements.txt
-    sed -i -e 's/^cryptography$/&==36.0.2/' conf/requirements.txt
+    sed -i -e 's/^cryptography.*/cryptography==36.0.2/' conf/requirements.txt
     echo "limit_memory_hard = 0" >> conf/odoo.conf
   fi
   if [[ $OSTYPE == 'linux-gnu'* ]]; then
