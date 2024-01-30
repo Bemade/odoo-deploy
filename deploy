@@ -38,8 +38,6 @@ eval `ssh-agent`
 ssh-add
 
 [ ! -d "$BASEDIR/odoo" ] && git clone -b $BRANCH git@github.com:odoo/odoo.git || echo "Odoo exist, skipping."
-[ ! -d "$BASEDIR/enterprise" ] && git clone -b $BRANCH git@github.com:odoo/enterprise.git || echo "Enterprise exist, skipping."
-[ ! -d "$BASEDIR/design-themes" ] && git clone -b $BRANCH git@github.com:odoo/design-themes.git || echo "Themes exist, skipping."
 
 rm -f ./path/file -fr requirements.txt
 
@@ -55,8 +53,6 @@ SPACER="    "
 ADDONSPATH="addons_path =\n"
 ADDONSPATH+=$SPACER$BASEDIR"/odoo/addons,\n"
 ADDONSPATH+=$SPACER$BASEDIR"/odoo/odoo/addons,\n"
-ADDONSPATH+=$SPACER$BASEDIR"/design-themes,\n"
-ADDONSPATH+=$SPACER$BASEDIR"/enterprise,\n"
 
 
 for REPO in $REPOS
