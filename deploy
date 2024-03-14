@@ -66,7 +66,7 @@ do
 
   if test -f "$REPO/requirements.txt"; then
     echo "$REPO/requirements.txt exists."
-    printf "\n# %s Requirements" "$REPO" >> conf/requirements.txt
+    printf "\n# %s Requirements\n" "$REPO" >> conf/requirements.txt
     cat "$REPO/requirements.txt" >> conf/requirements.txt
   fi
 
