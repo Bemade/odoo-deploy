@@ -41,8 +41,6 @@ ssh-add
 [ ! -d "$BASEDIR/enterprise" ] && git clone -b $BRANCH git@github.com:odoo/enterprise.git || echo "Enterprise exist, skipping."
 [ ! -d "$BASEDIR/design-themes" ] && git clone -b $BRANCH git@github.com:odoo/design-themes.git || echo "Themes exist, skipping."
 
-rm -f ./path/file -fr requirements.txt
-
 [ "$(ls -A $REPOSDIR/crm)" ] && echo "Git submodule already initialised, skipping" || git submodule update --init --recursive
 
 mkdir -p conf
