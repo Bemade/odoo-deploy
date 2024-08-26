@@ -38,7 +38,6 @@ eval `ssh-agent`
 ssh-add
 
 [ ! -d "$BASEDIR/odoo" ] && git clone -b $BRANCH git@github.com:odoo/odoo.git || echo "Odoo exist, skipping."
-[ ! -d "$BASEDIR/design-themes" ] && git clone -b $BRANCH git@github.com:odoo/design-themes.git || echo "Themes exist, skipping."
 
 rm -f ./path/file -fr requirements.txt
 
