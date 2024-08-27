@@ -53,7 +53,6 @@ SPACER="    "
 ADDONSPATH="addons_path =\n"
 ADDONSPATH+=$SPACER$BASEDIR"/odoo/addons,\n"
 ADDONSPATH+=$SPACER$BASEDIR"/odoo/odoo/addons,\n"
-ADDONSPATH+=$SPACER$BASEDIR"/design-themes,\n"
 
 
 for REPO in $REPOS
